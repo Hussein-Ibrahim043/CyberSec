@@ -92,6 +92,11 @@ The alias `cybersec` will be created for the tool.
 **Error: Command '['python3', '.py']' returned non-zero exit status 2.** : Ensure that you use aliac `cybersec` under **CyberSec/ directory**.
 
 ---
+## 🛡️ Disclaimer
+- This tool is for educational and ethical purposes only.
+- Do not use it on systems you do not own or have explicit permission to test.
+
+---
 
 ## License
 
@@ -105,7 +110,7 @@ Contributions are welcome! Please open an issue or submit a pull request for any
 
 ---
 
-## Author
+## 👨‍💻 Author
 - **Hussein Ibrahim (Instructor)**
   - GitHub (https://github.com/Hussein-Ibrahim043)
   - LinkedIn (https://linkedin.com/in/hussein-ibrahim043)
