@@ -5,9 +5,8 @@ CyberSec Toolkit is a Python-based project that provides a set of tools for cybe
 It includes installation scripts, a CLI launcher, and a modular design for extending functionality.
 
 ## Project Note
-
-📌 This project is a **final graduation project** of student **Abdalla Azam**.  
-Developed as part of academic requirements to demonstrate skills in **Programming, Python, cybersecurity concepts, and software engineering practices**.
+- This project is a **final graduation project** of student **Abdalla Azam**.  
+- Developed as part of academic requirements to demonstrate skills in **Programming, Python, cybersecurity concepts, and software engineering practices**.
 ---
 
 ## ✨Features
@@ -21,7 +20,7 @@ Developed as part of academic requirements to demonstrate skills in **Programmin
 
 ---
 ## 📂 Project Structure 
-'''
+```
 CyberSec-ToolKit/
 ├── CaesarCipher.py # Caesar cipher utility (encrypt / decrypt text)
 ├── file_Enc_Dec.py # File encryption/decryption (AES, password-derived keys)
@@ -34,7 +33,7 @@ CyberSec-ToolKit/
 ├── install.sh # Installer script: installs deps, creates cybersec launcher/alias
 ├── README.md
 └── LICENSE # Project license (MIT)
-'''
+```
 ---
   
 ## 🛠️ Requirements
@@ -109,7 +108,7 @@ Contributions are welcome! Please open an issue or submit a pull request for any
 ---
 
 ## Author
-- Hussein Ibrahim (Instructor)
+- **Hussein Ibrahim (Instructor)**
   - GitHub (https://github.com/Hussein-Ibrahim043)
   - LinkedIn (https://linkedin.com/in/hussein-ibrahim043)
-- Abdalla Azzam (Student)
+- **Abdalla Azzam (Student)**
