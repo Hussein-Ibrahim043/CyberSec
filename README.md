@@ -1,6 +1,4 @@
 # 🔐 CyberSec ToolKit
-## 📝Overview
-
 CyberSec Toolkit is a Python-based project that provides a set of tools for cybersecurity learning and concept practice.  
 It includes installation scripts, a CLI launcher, and a modular design for extending functionality.
 
@@ -22,17 +20,17 @@ It includes installation scripts, a CLI launcher, and a modular design for exten
 ## 📂 Project Structure 
 ```
 CyberSec-ToolKit/
-├── CaesarCipher.py # Caesar cipher utility (encrypt / decrypt text)
-├── file_Enc_Dec.py # File encryption/decryption (AES, password-derived keys)
-├── hashGenerator.py # Generate common hashes (MD5, SHA1, SHA256, ...)
-├── passwordGenerator.py # Password generator (custom length / charset)
-├── passwordChecker.py # Password strength checker / feedback tool
-├── portScanner.py # Multi-threaded port scanner with banner/version detection
-├── vt_antivirus.py # VirusTotal API helper / scan-check integration
-├── __init__.py # Package entrypoint (runs the toolkit CLI)
-├── install.sh # Installer script: installs deps, creates cybersec launcher/alias
+├── CaesarCipher.py 
+├── file_Enc_Dec.py 
+├── hashGenerator.py
+├── passwordGenerator.py
+├── passwordChecker.py
+├── portScanner.py
+├── vt_antivirus.py
+├── __init__.py
+├── install.sh 
 ├── README.md
-└── LICENSE # Project license (MIT)
+└── LICENSE 
 ```
 ---
   
@@ -91,7 +89,7 @@ The alias `cybersec` will be created for the tool.
 
 ## 🛡️ Troubleshooting
 
-**Error: Command '['python3', '.py']' returned non-zero exit status 2.** : Ensure that you use aliac 'cybersec' under CyberSec/ directory.
+**Error: Command '['python3', '.py']' returned non-zero exit status 2.** : Ensure that you use aliac `cybersec` under **CyberSec/ directory**.
 
 ---
 
