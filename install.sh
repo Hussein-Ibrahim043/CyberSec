@@ -2,27 +2,39 @@
 set -euo pipefail
 
 # install_cybersec.sh
-# Run from your project root (the directory that contains CyberSec/)
-# Creates ~/bin/cybersec launcher and installs required packages.
+# Run this from inside CyberSec/ directory
+# - Creates a .venv in project root (CyberSec/.venv)
+# - Installs required packages
+# - Creates ~/bin/cybersec launcher
+# - Adds PATH + alias to the current user's ~/.bashrc and ~/.zshrc
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PACKAGE_DIR="$ROOT_DIR/CyberSec"
+PACKAGE_DIR="$ROOT_DIR"
 TOOL_PATH="$PACKAGE_DIR/__init__.py"
 LAUNCHER_DIR="$HOME/bin"
 LAUNCHER_PATH="$LAUNCHER_DIR/cybersec"
 BASHRC="$HOME/.bashrc"
+ZSHRC="$HOME/.zshrc"
 REQ_FILE="$ROOT_DIR/requirements-toolkit.txt"
+VENV_DIR="$ROOT_DIR/.venv"
+
+# Colors for pretty printing
+GREEN="\033[92m"
+CYAN="\033[1;36m"
+YELLOW="\033[93m"
+MAGENTA="\033[95m"
+RESET="\033[0m"
 
 echo
-echo "== Cybersec Toolkit Installer =="
-echo "Project root detected: $ROOT_DIR"
+echo -e "${CYAN}== CyberSec Toolkit Installer ==${RESET}"
+echo "Project root: $ROOT_DIR"
 echo
 
-# Check package entrypoint
+# Check entrypoint
 if [ ! -f "$TOOL_PATH" ]; then
-  echo "WARNING: Expected toolkit entrypoint not found at:"
+  echo -e "${YELLOW}WARNING:${RESET} __init__.py not found at:"
   echo "  $TOOL_PATH"
-  echo "Make sure the package folder is named 'CyberSec' and contains __init__.py"
+  echo "If your entrypoint differs, adjust TOOL_PATH in this script."
   read -p "Continue anyway? (y/N): " yn
   case "$yn" in
     [Yy]*) ;;
@@ -30,98 +42,95 @@ if [ ! -f "$TOOL_PATH" ]; then
   esac
 fi
 
-# Create requirements file (third-party libs)
+# Create requirements file
 cat > "$REQ_FILE" <<'REQ'
 requests
 rich
 pyfiglet
 cryptography
 REQ
+echo -e "${GREEN}Created requirements file: $REQ_FILE${RESET}"
 
-echo "Created requirements file: $REQ_FILE"
-echo
-
-# Check python3 & pip3
+# Check python3
 if ! command -v python3 >/dev/null 2>&1; then
-  echo "ERROR: python3 not found. Please install Python 3 and re-run this script." >&2
+  echo "ERROR: python3 not found. Please install it and re-run." >&2
   exit 1
 fi
 
-if ! command -v pip3 >/dev/null 2>&1; then
-  echo "pip3 not found — attempting to install pip..."
-  python3 -m ensurepip --upgrade || true
+# Create venv
+if [ ! -d "$VENV_DIR" ]; then
+  echo "Creating venv at $VENV_DIR ..."
+  python3 -m venv "$VENV_DIR"
 fi
 
-# Install packages (user, fallback to system-wide)
-echo "Installing Python packages from $REQ_FILE..."
-if python3 -m pip install --user -r "$REQ_FILE"; then
-  echo "Installed packages to user site-packages."
-else
-  echo "User install failed, trying system-wide install (sudo may be required)..."
-  if command -v sudo >/dev/null 2>&1; then
-    sudo python3 -m pip install -r "$REQ_FILE"
-  else
-    python3 -m pip install -r "$REQ_FILE" || {
-      echo "Failed to install packages. Please run this script with sudo or install packages manually." >&2
-      exit 1
-    }
-  fi
-fi
-echo "Dependencies installed."
-echo
+# Install packages
+echo "Installing dependencies..."
+source "$VENV_DIR/bin/activate"
+python -m pip install --upgrade pip
+python -m pip install -r "$REQ_FILE"
+deactivate
+echo -e "${GREEN}Dependencies installed in $VENV_DIR.${RESET}"
 
-# Create ~/bin if needed
-if [ ! -d "$LAUNCHER_DIR" ]; then
-  mkdir -p "$LAUNCHER_DIR"
-  echo "Created $LAUNCHER_DIR"
-fi
+# Create ~/bin if missing
+mkdir -p "$LAUNCHER_DIR"
 
-# Create launcher script
-cat > "$LAUNCHER_PATH" <<EOF
+# Create launcher
+cat > "$LAUNCHER_PATH" <<LAUNCHER
 #!/usr/bin/env bash
-# launcher created by install_cybersec.sh
-# Try to run package as module first (recommended), otherwise run __init__.py directly.
+VENV_DIR="$VENV_DIR"
+TOOL_PY="$TOOL_PATH"
+PY="\$VENV_DIR/bin/python"
 
-# prefer python3 -m CyberSec (works if CyberSec is a package)
-if python3 -c "import importlib, sys; importlib.import_module('CyberSec'); sys.exit(0)" 2>/dev/null; then
-  exec python3 -m CyberSec "\$@"
+if "\$PY" -c "import CyberSec" 2>/dev/null; then
+  exec "\$PY" -m CyberSec "\$@"
+elif [ -f "\$TOOL_PY" ]; then
+  exec "\$PY" "\$TOOL_PY" "\$@"
 else
-  exec python3 "$TOOL_PATH" "\$@"
+  echo "ERROR: Cannot run CyberSec (module not found, no __init__.py)"
+  exit 2
 fi
-EOF
+LAUNCHER
 
 chmod +x "$LAUNCHER_PATH"
-echo "Created launcher: $LAUNCHER_PATH (executable)"
+echo -e "${GREEN}Created launcher at $LAUNCHER_PATH${RESET}"
 
-# Ensure ~/bin is in PATH in .bashrc
-if ! grep -q 'export PATH="$HOME/bin:$PATH"' "$BASHRC" 2>/dev/null; then
-  echo "" >> "$BASHRC"
-  echo "# Added by Cybersec Toolkit installer: ensure ~/bin is in PATH" >> "$BASHRC"
-  echo 'export PATH="$HOME/bin:$PATH"' >> "$BASHRC"
-  echo "Appended PATH update to $BASHRC"
-fi
+# Add alias + PATH to rc files
+add_rc_entries() {
+  local rcfile="$1"
+  local rcname="$2"
 
-# Add alias 'cybersec' to bashrc if not present
-ALIAS_LINE="alias cybersec=\"$LAUNCHER_PATH\""
-if ! grep -Fxq "$ALIAS_LINE" "$BASHRC" 2>/dev/null; then
-  echo "" >> "$BASHRC"
-  echo "# Alias for Cybersec Toolkit" >> "$BASHRC"
-  echo "$ALIAS_LINE" >> "$BASHRC"
-  echo "Added alias 'cybersec' to $BASHRC"
-fi
+  local path_line='export PATH="$HOME/bin:$PATH"'
+  local alias_line="alias cybersec=\"$LAUNCHER_PATH\""
 
-# Source .bashrc for interactive shells
-if [ -n "${PS1-}" ] && [ -f "$BASHRC" ]; then
-  # shellcheck disable=SC1090
-  source "$BASHRC"
-  echo "Sourced $BASHRC (current shell)."
-else
-  echo "Note: To use the 'cybersec' command in this shell, run: source $BASHRC"
+  [ ! -f "$rcfile" ] && touch "$rcfile"
+
+  grep -qF "$path_line" "$rcfile" || {
+    echo "" >> "$rcfile"
+    echo "# Added by CyberSec installer" >> "$rcfile"
+    echo "$path_line" >> "$rcfile"
+    echo -e "${CYAN}Updated PATH in $rcname${RESET}"
+  }
+
+  grep -qF "$alias_line" "$rcfile" || {
+    echo "" >> "$rcfile"
+    echo "# CyberSec alias" >> "$rcfile"
+    echo "$alias_line" >> "$rcfile"
+    echo -e "${CYAN}Added alias to $rcname${RESET}"
+  }
+}
+
+add_rc_entries "$BASHRC" "bashrc"
+add_rc_entries "$ZSHRC" "zshrc"   # <-- always user’s ~/.zshrc
+
+# Source rc file in current shell if possible
+if [ -n "${PS1-}" ]; then
+  case "$(basename "${SHELL:-}")" in
+    zsh) [ -f "$ZSHRC" ] && source "$ZSHRC" ;;
+    bash) [ -f "$BASHRC" ] && source "$BASHRC" ;;
+  esac
 fi
 
 echo
-echo "Installation complete!"
-echo "You can now run the toolkit with: cybersec"
-echo "Or run directly from project root: python3 $TOOL_PATH"
-echo "Or run as package: python3 -m CyberSec"
-echo
+echo -e "${GREEN}[+] Installation complete!${RESET}"
+echo -e "${MAGENTA}Run with: cybersec${RESET}"
+echo -e "${MAGENTA}Or directly: $VENV_DIR/bin/python $TOOL_PATH${RESET}"
