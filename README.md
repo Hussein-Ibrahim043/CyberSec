@@ -84,7 +84,13 @@ The alias `cybersec` will be created for the tool.
    cybersec
 ```
      
-        
+## 📸 Screenshots (Samples)
+<img width="683" height="556" alt="image" src="https://github.com/user-attachments/assets/6cc76b57-f91b-4a2d-99c4-aaf43bf30282" />
+<img width="891" height="715" alt="image" src="https://github.com/user-attachments/assets/f6d57ad5-da20-4c79-97bb-8b49b37742da" />
+<img width="1565" height="645" alt="image" src="https://github.com/user-attachments/assets/42f018be-71a5-4546-8bc1-3255e5093e9b" />
+<img width="1187" height="462" alt="image" src="https://github.com/user-attachments/assets/0fe8b280-fe79-4d49-9ffc-668678e160bc" />
+
+
 ---
 
 ## 🛡️ Troubleshooting
